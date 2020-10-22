@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/rotate.h"
-#include "libyuv/rotate_row.h"
+#include "rotate.h"
+#include "rotate_row.h"
 
-#include "libyuv/basic_types.h"
+#include "basic_types.h"
 
 #ifdef __cplusplus
 namespace libyuv {

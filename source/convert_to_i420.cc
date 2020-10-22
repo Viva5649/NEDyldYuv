@@ -10,9 +10,9 @@
 
 #include <stdlib.h>
 
-#include "libyuv/convert.h"
+#include "convert.h"
 
-#include "libyuv/video_common.h"
+#include "video_common.h"
 
 #ifdef __cplusplus
 namespace libyuv {

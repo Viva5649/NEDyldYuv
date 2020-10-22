@@ -8,16 +8,16 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/convert_from.h"
+#include "convert_from.h"
 
-#include "libyuv/basic_types.h"
-#include "libyuv/convert.h"  // For I420Copy
-#include "libyuv/cpu_id.h"
-#include "libyuv/planar_functions.h"
-#include "libyuv/rotate.h"
-#include "libyuv/row.h"
-#include "libyuv/scale.h"  // For ScalePlane()
-#include "libyuv/video_common.h"
+#include "basic_types.h"
+#include "convert.h"  // For I420Copy
+#include "cpu_id.h"
+#include "planar_functions.h"
+#include "rotate.h"
+#include "row.h"
+#include "scale.h"  // For ScalePlane()
+#include "video_common.h"
 
 #ifdef __cplusplus
 namespace libyuv {

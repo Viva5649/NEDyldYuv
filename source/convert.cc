@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/convert.h"
+#include "convert.h"
 
-#include "libyuv/basic_types.h"
-#include "libyuv/cpu_id.h"
-#include "libyuv/planar_functions.h"
-#include "libyuv/rotate.h"
-#include "libyuv/row.h"
-#include "libyuv/scale.h"  // For ScalePlane()
+#include "basic_types.h"
+#include "cpu_id.h"
+#include "planar_functions.h"
+#include "rotate.h"
+#include "row.h"
+#include "scale.h"  // For ScalePlane()
 
 #ifdef __cplusplus
 namespace libyuv {

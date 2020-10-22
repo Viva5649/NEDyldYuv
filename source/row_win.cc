@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/row.h"
+#include "row.h"
 
 // This module is for Visual C 32/64 bit and clangcl 32 bit
 #if !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER) && \

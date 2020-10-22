@@ -8,16 +8,16 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/planar_functions.h"
+#include "planar_functions.h"
 
 #include <string.h>  // for memset()
 
-#include "libyuv/cpu_id.h"
+#include "cpu_id.h"
 #ifdef HAVE_JPEG
-#include "libyuv/mjpeg_decoder.h"
+#include "mjpeg_decoder.h"
 #endif
-#include "libyuv/row.h"
-#include "libyuv/scale_row.h"  // for ScaleRowDown2
+#include "row.h"
+#include "scale_row.h"  // for ScaleRowDown2
 
 #ifdef __cplusplus
 namespace libyuv {

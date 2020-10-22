@@ -8,15 +8,15 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/convert_argb.h"
+#include "convert_argb.h"
 
-#include "libyuv/cpu_id.h"
+#include "cpu_id.h"
 #ifdef HAVE_JPEG
-#include "libyuv/mjpeg_decoder.h"
+#include "mjpeg_decoder.h"
 #endif
-#include "libyuv/rotate_argb.h"
-#include "libyuv/row.h"
-#include "libyuv/video_common.h"
+#include "rotate_argb.h"
+#include "row.h"
+#include "video_common.h"
 
 #ifdef __cplusplus
 namespace libyuv {

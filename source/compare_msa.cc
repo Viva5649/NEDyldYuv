@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/basic_types.h"
+#include "basic_types.h"
 
-#include "libyuv/compare_row.h"
-#include "libyuv/row.h"
+#include "compare_row.h"
+#include "row.h"
 
 // This module is for GCC MSA
 #if !defined(LIBYUV_DISABLE_MSA) && defined(__mips_msa)
-#include "libyuv/macros_msa.h"
+#include "macros_msa.h"
 
 #ifdef __cplusplus
 namespace libyuv {

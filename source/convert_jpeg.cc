@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/convert.h"
-#include "libyuv/convert_argb.h"
+#include "convert.h"
+#include "convert_argb.h"
 
 #ifdef HAVE_JPEG
-#include "libyuv/mjpeg_decoder.h"
+#include "mjpeg_decoder.h"
 #endif
 
 #ifdef __cplusplus

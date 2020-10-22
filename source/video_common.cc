@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/video_common.h"
+#include "video_common.h"
 
 #ifdef __cplusplus
 namespace libyuv {

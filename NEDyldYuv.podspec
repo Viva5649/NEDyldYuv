@@ -17,15 +17,12 @@ Pod::Spec.new do |spec|
 
   spec.name         = "NEDyldYuv"
   spec.version      = "0.0.1"
-  spec.summary      = "A short description of NEDyldYuv."
 
   # This description is used to generate tags and improve search results.
   #   * Think: What does it do? Why did you write it? What is the focus?
   #   * Try to keep it short, snappy and to the point.
   #   * Write the description between the DESC delimiters below.
   #   * Finally, don't worry about the indent, CocoaPods strips it!
-  spec.description  = <<-DESC
-                   DESC
 
   spec.homepage     = "https://github.com/Jadite/NEDyldYuv.git"
   # spec.screenshots  = "www.example.com/screenshots_1.gif", "www.example.com/screenshots_2.gif"
@@ -38,7 +35,11 @@ Pod::Spec.new do |spec|
   #  Popular ones are 'MIT', 'BSD' and 'Apache License, Version 2.0'.
   #
 
-  spec.license      = "MIT (example)"
+  spec.summary          = 'Netease Libyuv framework.'
+  spec.homepage         = 'http://netease.im'
+  spec.license          = { :file => 'LICENSE' }
+  spec.author           = 'Netease IM Team'
+
   # spec.license      = { :type => "MIT", :file => "FILE_LICENSE" }
 
 
@@ -52,7 +53,6 @@ Pod::Spec.new do |spec|
   #  profile URL.
   #
 
-  spec.author             = { "殷海超" => "haisens@163.com" }
   # Or just: spec.author    = "殷海超"
   # spec.authors            = { "殷海超" => "haisens@163.com" }
   # spec.social_media_url   = "https://twitter.com/殷海超"
@@ -90,12 +90,20 @@ Pod::Spec.new do |spec|
   #  Not including the public_header_files will make all headers public.
   #
 
-  spec.source_files  = "source", "include/**/*.{h,m}"
+  spec.source_files  = "source", "include/**/*.{h,cc,c}"
+  spec.libraries = "c++"
+  
   # spec.exclude_files = "Classes/Exclude"
 
-  # spec.public_header_files = "Classes/**/*.h"
+  spec.public_header_files = "include/**/*.h"
+  spec.ios.deployment_target = '9.0'
 
-
+  spec.xcconfig = { 
+    'USER_HEADER_SEARCH_PATHS' => [
+        '$(inherited)', 
+        # '${PODS_ROOT}/NEDyldYuv/NEDyldYuv.framework/Headers', 
+    ] 
+}
   # ――― Resources ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
   #  A list of resources included with the Pod. These are copied into the

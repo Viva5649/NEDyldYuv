@@ -8,13 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/rotate.h"
+#include "rotate.h"
 
-#include "libyuv/convert.h"
-#include "libyuv/cpu_id.h"
-#include "libyuv/planar_functions.h"
-#include "libyuv/rotate_row.h"
-#include "libyuv/row.h"
+#include "convert.h"
+#include "cpu_id.h"
+#include "planar_functions.h"
+#include "rotate_row.h"
+#include "row.h"
 
 #ifdef __cplusplus
 namespace libyuv {
