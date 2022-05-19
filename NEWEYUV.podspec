@@ -15,7 +15,7 @@ Pod::Spec.new do |spec|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  spec.name         = "NEDyldYuv"
+  spec.name         = "NEWEYUV"
   spec.version      = "0.0.1"
 
   # This description is used to generate tags and improve search results.
@@ -24,7 +24,7 @@ Pod::Spec.new do |spec|
   #   * Write the description between the DESC delimiters below.
   #   * Finally, don't worry about the indent, CocoaPods strips it!
 
-  spec.homepage     = "https://github.com/Jadite/NEDyldYuv.git"
+  spec.homepage     = "https://github.com/Viva5649/NEDyldYuv.git"
   # spec.screenshots  = "www.example.com/screenshots_1.gif", "www.example.com/screenshots_2.gif"
 
 
@@ -38,7 +38,7 @@ Pod::Spec.new do |spec|
   spec.summary          = 'Netease Libyuv framework.'
   spec.homepage         = 'http://netease.im'
   spec.license          = { :file => 'LICENSE' }
-  spec.author           = 'Netease IM Team'
+  spec.author           = 'Netease RTC Team'
 
   # spec.license      = { :type => "MIT", :file => "FILE_LICENSE" }
 
@@ -79,7 +79,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source       = { :git => "https://github.com/Jadite/NEDyldYuv.git", :tag => "#{spec.version}" }
+  spec.source       = { :git => "https://github.com/Viva5649/NEDyldYuv.git", :tag => "#{spec.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #

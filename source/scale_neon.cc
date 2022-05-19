@@ -40,7 +40,7 @@ void ScaleRowDown2_NEON(const uint8_t* src_ptr,
         "+r"(dst_width)  // %2
       :
       : "q0", "q1"  // Clobber List
-      );
+  );
 }
 
 // Read 32x1 average down and write 16x1.
@@ -61,7 +61,7 @@ void ScaleRowDown2Linear_NEON(const uint8_t* src_ptr,
         "+r"(dst_width)  // %2
       :
       : "q0", "q1"  // Clobber List
-      );
+  );
 }
 
 // Read 32x2 average down and write 16x1.
@@ -92,7 +92,7 @@ void ScaleRowDown2Box_NEON(const uint8_t* src_ptr,
         "+r"(dst_width)    // %3
       :
       : "q0", "q1", "q2", "q3"  // Clobber List
-      );
+  );
 }
 
 void ScaleRowDown4_NEON(const uint8_t* src_ptr,
@@ -504,38 +504,26 @@ void ScaleRowDown38_2_Box_NEON(const uint8_t* src_ptr,
       : "q0", "q1", "q2", "q3", "q13", "q14", "memory", "cc");
 }
 
-void ScaleAddRows_NEON(const uint8_t* src_ptr,
-                       ptrdiff_t src_stride,
-                       uint16_t* dst_ptr,
-                       int src_width,
-                       int src_height) {
-  const uint8_t* src_tmp;
+// Add a row of bytes to a row of shorts.  Used for box filter.
+// Reads 16 bytes and accumulates to 16 shorts at a time.
+void ScaleAddRow_NEON(const uint8_t* src_ptr,
+                      uint16_t* dst_ptr,
+                      int src_width) {
   asm volatile(
       "1:                                        \n"
-      "mov       %0, %1                          \n"
-      "mov       r12, %5                         \n"
-      "veor      q2, q2, q2                      \n"
-      "veor      q3, q3, q3                      \n"
-      "2:                                        \n"
-      // load 16 pixels into q0
-      "vld1.8     {q0}, [%0], %3                 \n"
-      "vaddw.u8   q3, q3, d1                     \n"
-      "vaddw.u8   q2, q2, d0                     \n"
-      "subs       r12, r12, #1                   \n"
-      "bgt        2b                             \n"
-      "vst1.16    {q2, q3}, [%2]!                \n"  // store pixels
-      "add        %1, %1, #16                    \n"
-      "subs       %4, %4, #16                    \n"  // 16 processed per loop
+      "vld1.16    {q1, q2}, [%1]                 \n"  // load accumulator
+      "vld1.8     {q0}, [%0]!                    \n"  // load 16 bytes
+      "vaddw.u8   q2, q2, d1                     \n"  // add
+      "vaddw.u8   q1, q1, d0                     \n"
+      "vst1.16    {q1, q2}, [%1]!                \n"  // store accumulator
+      "subs       %2, %2, #16                    \n"  // 16 processed per loop
       "bgt        1b                             \n"
-      : "=&r"(src_tmp),    // %0
-        "+r"(src_ptr),     // %1
-        "+r"(dst_ptr),     // %2
-        "+r"(src_stride),  // %3
-        "+r"(src_width),   // %4
-        "+r"(src_height)   // %5
+      : "+r"(src_ptr),   // %0
+        "+r"(dst_ptr),   // %1
+        "+r"(src_width)  // %2
       :
-      : "memory", "cc", "r12", "q0", "q1", "q2", "q3"  // Clobber List
-      );
+      : "memory", "cc", "q0", "q1", "q2"  // Clobber List
+  );
 }
 
 // TODO(Yang Zhang): Investigate less load instructions for
@@ -717,7 +705,7 @@ void ScaleARGBRowDown2_NEON(const uint8_t* src_ptr,
         "+r"(dst_width)  // %2
       :
       : "memory", "cc", "q0", "q1", "q2", "q3"  // Clobber List
-      );
+  );
 }
 
 //  46:  f964 018d   vld4.32  {d16,d18,d20,d22}, [r4]!
@@ -746,7 +734,7 @@ void ScaleARGBRowDown2Linear_NEON(const uint8_t* src_argb,
         "+r"(dst_width)  // %2
       :
       : "memory", "cc", "q0", "q1", "q2", "q3"  // Clobber List
-      );
+  );
 }
 
 void ScaleARGBRowDown2Box_NEON(const uint8_t* src_ptr,
@@ -961,6 +949,35 @@ void ScaleARGBFilterCols_NEON(uint8_t* dst_argb,
 }
 
 #undef LOAD2_DATA32_LANE
+
+void ScaleUVRowDown2Box_NEON(const uint8_t* src_ptr,
+                               ptrdiff_t src_stride,
+                               uint8_t* dst,
+                               int dst_width) {
+  asm volatile(
+      // change the stride to row 2 pointer
+      "add        %1, %1, %0                     \n"
+      "1:                                        \n"
+      "vld2.8     {d0, d2}, [%0]!                \n"  // load 8 UV pixels.
+      "vld2.8     {d1, d3}, [%0]!                \n"  // load next 8 UV
+      "subs       %3, %3, #8                     \n"  // 8 processed per loop.
+      "vpaddl.u8  q0, q0                         \n"  // U 16 bytes -> 8 shorts.
+      "vpaddl.u8  q1, q1                         \n"  // V 16 bytes -> 8 shorts.
+      "vld2.8     {d16, d18}, [%1]!              \n"  // load 8 more UV
+      "vld2.8     {d17, d19}, [%1]!              \n"  // load last 8 UV
+      "vpadal.u8  q0, q8                         \n"  // U 16 bytes -> 8 shorts.
+      "vpadal.u8  q1, q9                         \n"  // V 16 bytes -> 8 shorts.
+      "vrshrn.u16 d0, q0, #2                     \n"  // round and pack to bytes
+      "vrshrn.u16 d1, q1, #2                     \n"
+      "vst2.8     {d0, d1}, [%2]!                \n"
+      "bgt        1b                             \n"
+      : "+r"(src_ptr),     // %0
+        "+r"(src_stride),  // %1
+        "+r"(dst),         // %2
+        "+r"(dst_width)    // %3
+      :
+      : "memory", "cc", "q0", "q1", "q8", "q9");
+}
 
 #endif  // defined(__ARM_NEON__) && !defined(__aarch64__)
 

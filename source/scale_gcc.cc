@@ -483,7 +483,7 @@ void ScaleRowDown34_SSSE3(const uint8_t* src_ptr,
       : "m"(kShuf0),  // %0
         "m"(kShuf1),  // %1
         "m"(kShuf2)   // %2
-      );
+  );
   asm volatile(
 
       LABELALIGN
@@ -521,7 +521,7 @@ void ScaleRowDown34_1_Box_SSSE3(const uint8_t* src_ptr,
       : "m"(kShuf01),  // %0
         "m"(kShuf11),  // %1
         "m"(kShuf21)   // %2
-      );
+  );
   asm volatile(
       "movdqa    %0,%%xmm5                       \n"  // kMadd01
       "movdqa    %1,%%xmm0                       \n"  // kMadd11
@@ -530,7 +530,7 @@ void ScaleRowDown34_1_Box_SSSE3(const uint8_t* src_ptr,
       : "m"(kMadd01),  // %0
         "m"(kMadd11),  // %1
         "m"(kRound34)  // %2
-      );
+  );
   asm volatile(
 
       LABELALIGN
@@ -587,7 +587,7 @@ void ScaleRowDown34_0_Box_SSSE3(const uint8_t* src_ptr,
       : "m"(kShuf01),  // %0
         "m"(kShuf11),  // %1
         "m"(kShuf21)   // %2
-      );
+  );
   asm volatile(
       "movdqa    %0,%%xmm5                       \n"  // kMadd01
       "movdqa    %1,%%xmm0                       \n"  // kMadd11
@@ -596,7 +596,7 @@ void ScaleRowDown34_0_Box_SSSE3(const uint8_t* src_ptr,
       : "m"(kMadd01),  // %0
         "m"(kMadd11),  // %1
         "m"(kRound34)  // %2
-      );
+  );
 
   asm volatile(
 
@@ -690,7 +690,7 @@ void ScaleRowDown38_2_Box_SSSE3(const uint8_t* src_ptr,
         "m"(kShufAb1),  // %1
         "m"(kShufAb2),  // %2
         "m"(kScaleAb2)  // %3
-      );
+  );
   asm volatile(
 
       LABELALIGN
@@ -734,7 +734,7 @@ void ScaleRowDown38_3_Box_SSSE3(const uint8_t* src_ptr,
       : "m"(kShufAc),    // %0
         "m"(kShufAc3),   // %1
         "m"(kScaleAc33)  // %2
-      );
+  );
   asm volatile(
 
       LABELALIGN
@@ -1272,7 +1272,7 @@ void ScaleARGBFilterCols_SSSE3(uint8_t* dst_argb,
       :
       : "m"(kShuffleColARGB),   // %0
         "m"(kShuffleFractions)  // %1
-      );
+  );
 
   asm volatile(
       "movd      %5,%%xmm2                       \n"
@@ -1365,6 +1365,94 @@ int FixedDiv1_X86(int num, int div) {
       : "memory", "cc", "edx");
   return num;
 }
+
+#ifdef HAS_SCALEUVROWDOWN2BOX_SSSE3
+// Shuffle table for splitting UV into upper and lower part of register.
+static const uvec8 kShuffleSplitUV = {0u, 2u, 4u, 6u, 8u, 10u, 12u, 14u,
+                                      1u, 3u, 5u, 7u, 9u, 11u, 13u, 15u};
+static const uvec8 kShuffleMergeUV = {0u, 8u, 2u, 10u, 4u, 12u, 6u, 14u,
+  0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+
+void ScaleUVRowDown2Box_SSSE3(const uint8_t* src_ptr,
+                              ptrdiff_t src_stride,
+                              uint8_t* dst_ptr,
+                              int dst_width) {
+  asm volatile(
+      "pcmpeqb    %%xmm4,%%xmm4                  \n"  // 01010101
+      "psrlw      $0xf,%%xmm4                    \n"
+      "packuswb   %%xmm4,%%xmm4                  \n"
+      "pxor       %%xmm5, %%xmm5                 \n"  // zero
+      "movdqa     %4,%%xmm1                      \n"  // split shuffler
+      "movdqa     %5,%%xmm3                      \n"  // merge shuffler
+
+      LABELALIGN
+      "1:                                        \n"
+      "movdqu     (%0),%%xmm0                    \n"  // 8 UV row 0
+      "movdqu     0x00(%0,%3,1),%%xmm2           \n"  // 8 UV row 1
+      "lea        0x10(%0),%0                    \n"
+      "pshufb     %%xmm1,%%xmm0                  \n"  // uuuuvvvv
+      "pshufb     %%xmm1,%%xmm2                  \n"
+      "pmaddubsw  %%xmm4,%%xmm0                  \n"  // horizontal add
+      "pmaddubsw  %%xmm4,%%xmm2                  \n"
+      "paddw      %%xmm2,%%xmm0                  \n"  // vertical add
+      "psrlw      $0x1,%%xmm0                    \n"  // round
+      "pavgw      %%xmm5,%%xmm0                  \n"
+      "pshufb     %%xmm3,%%xmm0                  \n"  // merge uv
+      "movq       %%xmm0,(%1)                    \n"
+      "lea        0x8(%1),%1                     \n"  // 4 UV
+      "sub        $0x4,%2                        \n"
+      "jg         1b                             \n"
+      : "+r"(src_ptr),               // %0
+        "+r"(dst_ptr),               // %1
+        "+r"(dst_width)              // %2
+      : "r"((intptr_t)(src_stride)), // %3
+        "m"(kShuffleSplitUV),        // %4
+        "m"(kShuffleMergeUV)         // %5
+      : "memory", "cc", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5");
+}
+#endif // HAS_SCALEUVROWDOWN2BOX_SSSE3
+
+#ifdef HAS_SCALEUVROWDOWN2BOX_AVX2
+void ScaleUVRowDown2Box_AVX2(const uint8_t* src_ptr,
+                             ptrdiff_t src_stride,
+                             uint8_t* dst_ptr,
+                             int dst_width) {
+  asm volatile(
+      "vpcmpeqb   %%ymm4,%%ymm4,%%ymm4           \n"  // 01010101
+      "vpsrlw     $0xf,%%ymm4,%%ymm4             \n"
+      "vpackuswb  %%ymm4,%%ymm4,%%ymm4           \n"
+      "vpxor      %%ymm5,%%ymm5,%%ymm5           \n"  // zero
+      "vbroadcastf128 %4,%%ymm1                  \n"  // split shuffler
+      "vbroadcastf128 %5,%%ymm3                  \n"  // merge shuffler
+
+      LABELALIGN
+      "1:                                        \n"
+      "vmovdqu    (%0),%%ymm0                    \n"  // 16 UV row 0
+      "vmovdqu    0x00(%0,%3,1),%%ymm2           \n"  // 16 UV row 1
+      "lea        0x20(%0),%0                    \n"
+      "vpshufb    %%ymm1,%%ymm0,%%ymm0           \n"  // uuuuvvvv
+      "vpshufb    %%ymm1,%%ymm2,%%ymm2           \n"
+      "vpmaddubsw %%ymm4,%%ymm0,%%ymm0           \n"  // horizontal add
+      "vpmaddubsw %%ymm4,%%ymm2,%%ymm2           \n"
+      "vpaddw     %%ymm2,%%ymm0,%%ymm0           \n"  // vertical add
+      "vpsrlw     $0x1,%%ymm0,%%ymm0             \n"  // round
+      "vpavgw     %%ymm5,%%ymm0,%%ymm0           \n"
+      "vpshufb    %%ymm3,%%ymm0,%%ymm0           \n"  // merge uv
+      "vpermq     $0xd8,%%ymm0,%%ymm0            \n"  // combine qwords
+      "vmovdqu    %%xmm0,(%1)                    \n"
+      "lea        0x10(%1),%1                    \n"  // 8 UV
+      "sub        $0x8,%2                        \n"
+      "jg         1b                             \n"
+      "vzeroupper                                \n"
+      : "+r"(src_ptr),               // %0
+        "+r"(dst_ptr),               // %1
+        "+r"(dst_width)              // %2
+      : "r"((intptr_t)(src_stride)), // %3
+        "m"(kShuffleSplitUV),        // %4
+        "m"(kShuffleMergeUV)         // %5
+      : "memory", "cc", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5");
+}
+#endif // HAS_SCALEUVROWDOWN2BOX_AVX2
 
 #endif  // defined(__x86_64__) || defined(__i386__)
 
